@@ -106,25 +106,26 @@ INSERT INTO Tb_Consultas (ID_PACIENTE, ID_MEDICO, DATA_CONSULTA, DIAGNOSTICO) VA
 (7, 6, '2026-04-14',NULL),
 (3, 5, '2026-04-15',NULL)
 
-
+-- Mostra nomes dos pacientes em ordem alfabética
 SELECT NOME FROM Tb_Pacientes
 ORDER BY NOME ASC
 
-
+/* Mostra os médicos por ordem alfabética de nomes dando join na tabela de especialidades para mostrar nomes dos médicos junto com o nome de suas áreas ao inves de um ID para melhor compreensão */
 SELECT Tb_Especialidades.NOME AS Especialidade, Tb_Medicos.NOME AS Medico FROM Tb_Medicos
 JOIN Tb_Especialidades ON Tb_Medicos.Especialidade_ID = Tb_Especialidades.ID
 ORDER BY NOME ASC
 
-
+/* Mostra as consultas com nomes de pacientes e médicos assim como a área de consulta em ordem de data tudo para melhor compreensão de usuário */
 SELECT Tb_Pacientes.NOME AS Paciente, Tb_Consultas.DATA_CONSULTA AS Data, Tb_Medicos.NOME AS Medico, Tb_Especialidades.NOME AS Especialidades FROM Tb_Consultas
 JOIN Tb_Pacientes ON Tb_Consultas.ID_PACIENTE = Tb_Pacientes.ID
 JOIN Tb_Medicos ON Tb_Consultas.ID_MEDICO = Tb_Medicos.ID
 JOIN Tb_Especialidades ON Tb_Medicos.ESPECIALIDADE_ID = Tb_Especialidades.ID
 ORDER BY DATA_CONSULTA ASC
 
-
+-- Atualiza a tabela consultas para o médico correto pois estava errada */
 UPDATE Tb_Consultas SET ID_MEDICO = 5 WHERE ID = 7
 
+/* Mostra os médicos cada um com sua quantidade de consultas em ordem ordem de quantidade de consultas */
 SELECT Tb_Medicos.NOME, COUNT(*) AS Total_Consultas FROM Tb_Medicos 
 JOIN Tb_Consultas ON Tb_Medicos.ID = Tb_Consultas.ID_MEDICO
 GROUP BY Tb_Medicos.NOME
