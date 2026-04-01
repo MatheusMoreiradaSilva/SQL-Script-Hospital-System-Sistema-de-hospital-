@@ -1,0 +1,131 @@
+-- Creates the database
+CREATE DATABASE Hospital
+
+USE Hospital
+GO
+
+-- Creates the medical specialties table
+CREATE TABLE Tb_Specialties(
+    ID INT PRIMARY KEY NOT NULL,
+    NAME VARCHAR(50) NOT NULL)
+
+
+-- Creates the doctors table
+CREATE TABLE Tb_Doctors(
+    ID INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+    NAME VARCHAR(50) NOT NULL,
+    LICENSE VARCHAR(20) NOT NULL,
+    SPECIALTY_ID INT NULL,
+
+    -- Links the doctor table with the specialty ID
+    CONSTRAINT FK_Specialty_Doctor
+        FOREIGN KEY (SPECIALTY_ID) REFERENCES Tb_Specialties (ID)
+)
+
+
+-- Creates the patients table
+CREATE TABLE Tb_Patients(
+    ID INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+    NAME VARCHAR(50) NOT NULL,
+    DATE_OF_BIRTH DATE NULL,
+    PHONE VARCHAR(20) NULL)
+
+
+-- Creates the appointments table
+CREATE TABLE Tb_Appointments(
+    ID INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+    PATIENT_ID INT NOT NULL,
+    DOCTOR_ID INT NOT NULL,
+    APPOINTMENT_DATE DATE NOT NULL,
+    DIAGNOSIS VARCHAR(100) NULL,
+
+    /* Links the doctors and patients tables using both IDs */
+    CONSTRAINT FK_Appointment_Patient
+        FOREIGN KEY (PATIENT_ID) REFERENCES Tb_Patients (ID),
+    CONSTRAINT FK_Appointment_Doctor
+        FOREIGN KEY (DOCTOR_ID) REFERENCES Tb_Doctors (ID)
+)
+
+
+USE Hospital
+GO
+
+-- Inserts data into the medical specialties table
+INSERT INTO Tb_Specialties (ID, NAME) VALUES
+(1,  'Cardiology'),
+(2,  'Pediatrics'),
+(3,  'Gastroenterology'),
+(4,  'Geriatrics'),
+(5,  'Endocrinology and Metabolism'),
+(6,  'Intensive Care Medicine'),
+(7,  'Nephrology'),
+(8,  'Pulmonology'),
+(9,  'Rheumatology'),
+(10, 'Clinical Oncology'),
+(11, 'Gynecology')
+
+
+-- Inserts data into the doctors table
+INSERT INTO Tb_Doctors (ID, NAME, LICENSE, SPECIALTY_ID) VALUES
+(1, 'Jorge Nascimento',           'CRM/RJ 987654', 2),
+(2, 'Pablo Oliveira',             'CRM/RJ 984929', 4),
+(3, 'Gabriel Fredericksen Silva', 'CRM/RJ 359318', 1),
+(4, 'Elizabeth Schroeder',        'CRM/RJ 534987', 10),
+(5, 'Ana Luiza Scancetti',        'CRM/RJ 259102', 8),
+(6, 'Sofia Melo Silva',           'CRM/RJ 789233', 11)
+
+
+-- Inserts data into the patients table
+INSERT INTO Tb_Patients (ID, NAME, DATE_OF_BIRTH, PHONE) VALUES
+(1, 'Flavia Cavalcante',          '1993-03-13', '22 98842-2312'),
+(2, 'Amanda Barbosa Santos',      '1988-05-28', '22 96428-7830'),
+(3, 'Igor Dias Ferreira',         '1995-12-30', '23 99812-0344'),
+(4, 'Nelcir Antonio Balbinot',    '1973-08-14', '21 99866-2312'),
+(5, 'Analice Barbosa Coelho',     '2000-01-11', '21 99859-2031'),
+(6, 'Marcelo Cardoso Marques',    '1999-06-25', '22 98848-7231'),
+(7, 'Katia Scherbakova Oliveira', '2008-07-15', '23 98875-4032'),
+(8, 'Ana Lucia Fischer',          '1993-12-23', '21 98850-2315')
+
+
+-- Inserts data into the appointments table
+INSERT INTO Tb_Appointments (PATIENT_ID, DOCTOR_ID, APPOINTMENT_DATE, DIAGNOSIS) VALUES
+(2, 6, '2026-04-04', NULL),
+(3, 5, '2026-04-07', NULL),
+(3, 1, '2026-04-08', NULL),
+(8, 4, '2026-04-01', 'Lung cancer'),
+(8, 4, '2026-04-08', 'Lung cancer'),
+(7, 6, '2026-04-14', NULL),
+(3, 5, '2026-04-15', NULL)
+
+
+-- Lists all patients in alphabetical order
+SELECT NAME FROM Tb_Patients
+ORDER BY NAME ASC
+
+/* Lists doctors in alphabetical order, joining the specialties table
+   to display specialty names instead of IDs for better readability */
+SELECT Tb_Specialties.NAME AS Specialty, Tb_Doctors.NAME AS Doctor
+FROM Tb_Doctors
+JOIN Tb_Specialties ON Tb_Doctors.SPECIALTY_ID = Tb_Specialties.ID
+ORDER BY Tb_Doctors.NAME ASC
+
+/* Lists all appointments with patient names, doctor names and specialty,
+   ordered by date for better user understanding */
+SELECT Tb_Patients.NAME AS Patient, Tb_Appointments.APPOINTMENT_DATE AS Date,
+       Tb_Doctors.NAME AS Doctor, Tb_Specialties.NAME AS Specialty
+FROM Tb_Appointments
+JOIN Tb_Patients    ON Tb_Appointments.PATIENT_ID = Tb_Patients.ID
+JOIN Tb_Doctors     ON Tb_Appointments.DOCTOR_ID  = Tb_Doctors.ID
+JOIN Tb_Specialties ON Tb_Doctors.SPECIALTY_ID    = Tb_Specialties.ID
+ORDER BY APPOINTMENT_DATE ASC
+
+-- Updates the appointments table to fix an incorrect doctor assignment
+UPDATE Tb_Appointments SET DOCTOR_ID = 5 WHERE ID = 7
+
+-- Lists each doctor with their total number of appointments,
+-- ordered by appointment count in descending order
+SELECT Tb_Doctors.NAME, COUNT(*) AS Total_Appointments
+FROM Tb_Doctors
+JOIN Tb_Appointments ON Tb_Doctors.ID = Tb_Appointments.DOCTOR_ID
+GROUP BY Tb_Doctors.NAME
+ORDER BY Total_Appointments DESC

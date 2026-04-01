@@ -1,0 +1,131 @@
+
+-- Cria a base de dados
+CREATE DATABASE Hospital
+
+USE Hospital
+GO
+
+--Cria a tabela de áreas de medicina
+CREATE TABLE Tb_Especialidades(
+	ID INT PRIMARY KEY NOT NULL,
+	NOME VARCHAR(50) NOT NULL)
+
+
+-- Cria a tabela de médicos
+CREATE TABLE Tb_Medicos(
+	ID INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	NOME VARCHAR(50) NOT NULL,
+	CRM VARCHAR(20) NOT NULL,
+	ESPECIALIDADE_ID INT NULL
+
+-- Relaciona com a tabela medico com o id de especialidade
+CONSTRAINT FK_Especialidade_Medico
+	FOREIGN KEY (ESPECIALIDADE_ID) REFERENCES Tb_Especialidades (ID)
+
+)
+
+
+-- Cria a tabela de pacientes 
+CREATE TABLE Tb_Pacientes(
+	ID INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	NOME VARCHAR(50) NOT NULL,
+	DATA_NASCIMENTO DATE NULL,
+	TELEFONE VARCHAR(20) NULL)
+
+
+-- Cria a tabela de consultas
+CREATE TABLE Tb_Consultas(
+	ID INT IDENTITY(1,1) PRIMARY KEY NOT NULL, 
+	ID_PACIENTE INT NOT NULL,
+	ID_MEDICO INT NOT NULL,
+	DATA_CONSULTA DATE NOT NULL,
+	DIAGNOSTICO VARCHAR(100) NULL,
+
+/* Relaciona a tabela de medicos e de pacientes dando entrada de ambos os IDs */
+CONSTRAINT FK_Consulta_Paciente 
+	FOREIGN KEY (ID_PACIENTE) REFERENCES Tb_Pacientes (ID),
+CONSTRAINT FK_Consulta_Medico
+	FOREIGN KEY (ID_MEDICO) REFERENCES Tb_Medicos (ID)
+)
+
+
+
+
+
+USE Hospital
+GO
+
+
+-- Insere dados na tabela de áreas médicas
+INSERT INTO Tb_Especialidades (ID, NOME) VALUES 
+
+(1, 'Cardiologia'),
+(2, 'Pediatria'),
+(3, 'Gastroenterologia'),
+(4, 'Geriatria'),
+(5, 'Endocrinologia e Metabologia'),
+(6, 'Medicina Intensiva'),
+(7, 'Nefrologia'),
+(8, 'Pneumologia'),
+(9, 'Reumatologia'),
+(10, 'Cancerologia Clínica (Oncologia)'),
+(11, 'Ginecologia') 
+
+
+-- Insere dados na tabela de médicos
+INSERT INTO Tb_Medicos (ID, NOME, CRM, ESPECIALIDADE_ID) VALUES
+
+(1, 'Jorge Nascimento', 'CRM/RJ 987654', 2),
+(2, 'Pablo Oliveira', 'CRM/RJ 984929', 4),
+(3, 'Gabriel Fredericksen Silva', 'CRM/RJ 359318', 1),
+(4, 'Elizabeth Schroeder', 'CRM/RJ 534987', 10),
+(5, 'Ana Luiza Scancetti', 'CRM/RJ 259102', 8),
+(6, 'Sofia Melo Silva', 'CRM/RJ 789233', 11) 
+
+
+
+-- Insere dados na tabela de pacientes
+INSERT INTO Tb_Pacientes (ID, NOME, DATA_NASCIMENTO, TELEFONE) VALUES
+(1, 'Flavia Cavalcante', '1993-03-13', '22 98842-2312'),
+(2, 'Amanda Barbosa Santos', '1988-05-28', '22 96428-7830'),
+(3, 'Igor Dias Ferreira', '1995-12-30', '23 99812-0344'),
+(4, 'Nelcir Antonio Balbinot', '1973-08-14', '21 99866-2312'),
+(5, 'Analice Barbosa Coelho', '2000-01-11', '21 99859-2031'),
+(6, 'Marcelo Cardoso Marques', '1999-06-25', '22 98848-7231'),
+(7, 'Katia Scherbakova Oliveira', '2008-07-15', '23 98875-4032'),
+(8, 'Ana Lucia Fischer', '1993-12-23', '21 98850-2315')
+
+
+-- Insere dados na tabela de consultas
+INSERT INTO Tb_Consultas (ID_PACIENTE, ID_MEDICO, DATA_CONSULTA, DIAGNOSTICO) VALUES
+(2, 6, '2026-04-04',NULL),
+(3, 5, '2026-04-07',NULL),
+(3, 1, '2026-04-08',NULL),
+(8, 4, '2026-04-01', 'Câncer de pulmão'),
+(8, 4, '2026-04-08', 'Câncer de pulmão'),
+(7, 6, '2026-04-14',NULL),
+(3, 5, '2026-04-15',NULL)
+
+
+1) SELECT NOME FROM Tb_Pacientes
+ORDER BY NOME ASC
+
+
+SELECT Tb_Especialidades.NOME AS Especialidade, Tb_Medicos.NOME AS Medico FROM Tb_Medicos
+JOIN Tb_Especialidades ON Tb_Medicos.Especialidade_ID = Tb_Especialidades.ID
+ORDER BY NOME ASC
+
+
+SELECT Tb_Pacientes.NOME AS Paciente, Tb_Consultas.DATA_CONSULTA AS Data, Tb_Medicos.NOME AS Medico, Tb_Especialidades.NOME AS Especialidades FROM Tb_Consultas
+JOIN Tb_Pacientes ON Tb_Consultas.ID_PACIENTE = Tb_Pacientes.ID
+JOIN Tb_Medicos ON Tb_Consultas.ID_MEDICO = Tb_Medicos.ID
+JOIN Tb_Especialidades ON Tb_Medicos.ESPECIALIDADE_ID = Tb_Especialidades.ID
+ORDER BY DATA_CONSULTA ASC
+
+
+UPDATE Tb_Consultas SET ID_MEDICO = 5 WHERE ID = 7
+
+SELECT Tb_Medicos.NOME, COUNT(*) AS Total_Consultas FROM Tb_Medicos 
+JOIN Tb_Consultas ON Tb_Medicos.ID = Tb_Consultas.ID_MEDICO
+GROUP BY Tb_Medicos.NOME
+ORDER BY Total_Consultas DESC
